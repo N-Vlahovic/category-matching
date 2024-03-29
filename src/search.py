@@ -1,53 +1,60 @@
 from pydantic import BaseModel
-from sentence_transformers import util
-import torch
-from typing import List
+from typing import List, Optional, Tuple
 
 import categories
-import embeddings
+import semantic_search
+import tf_idf
 
 
-corpus_embeddings: torch.Tensor = embeddings.get_corpus_embedding()
+AbstractSearchRes = semantic_search.SemanticSearchRes | tf_idf.TfIdfSearchRes
 
 
-class SemanticSearchRes(BaseModel):
+class SearchRes(BaseModel):
     category: categories.Category
-    score: float
+    semantic_score: Optional[float]
+    tfidf_score: Optional[float]
+    weighted_score: Optional[float]
 
 
-class SemanticSearch(BaseModel):
+class Search(BaseModel):
     query: str
-    results: List[SemanticSearchRes]
     top_k: int
+    results: List[SearchRes]
 
 
-def core_search(query: str, top_k: int = 3) -> torch.topk:
-    query_embedding = embeddings.encode(query, convert_to_tensor=True)
-    cos_scores = util.cos_sim(query_embedding, corpus_embeddings)[0]
-    return torch.topk(cos_scores, k=top_k)
+def helper(s_res: AbstractSearchRes, others: List[AbstractSearchRes]) -> Tuple[float, float, float]:
+    this_score = s_res.score
+    other_score = None
+    try:
+        other_score = next(filter(lambda _: _.category == s_res.category, others)).score
+    except StopIteration:
+        pass
+    weighted_score = .5 * this_score + .5 * (other_score if isinstance(other_score, float) else 0)
+    return this_score, other_score, weighted_score
 
 
-def semantic_search(query: str, top_k: int = 3) -> SemanticSearch:
-    top_results = core_search(query, top_k)
-    return SemanticSearch(
+def search(query: str, top_k: int) -> Search:
+    # TODO: Handle TfIdf results that aren't in semantic results
+    semantic_results = semantic_search.semantic_search(query, top_k).results
+    tfidf_results = tf_idf.get_tf_idf_scores(query, top_k).results
+    results = []
+    for s_res in semantic_results:
+        category = s_res.category
+        semantic_score, tfidf_score, weighted_score = helper(s_res, tfidf_results)
+        results.append(SearchRes(
+            category=category,
+            semantic_score=semantic_score,
+            tfidf_score=tfidf_score,
+            weighted_score=weighted_score,
+        ))
+    return Search(
         query=query,
         top_k=top_k,
-        results=[
-            SemanticSearchRes(
-                category=categories.CORPUS[idx],
-                score=score,
-            ) for score, idx in zip(top_results[0], top_results[1])
-        ]
+        results=sorted(results, key=lambda _: _.weighted_score, reverse=True),
     )
 
 
 if __name__ == '__main__':
-    Q = [
-        'single board computer',
-        'screwdriver',
-        'machine operator',
-    ]
-    for q in Q:
-        print(semantic_search(q))
-        print()
-    print()
+    import pprint
+
+    pprint.pprint(search('computer', 2))

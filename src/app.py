@@ -4,6 +4,7 @@ from typing import List
 
 import categories
 import embeddings
+import semantic_search
 import search
 import tf_idf
 
@@ -31,8 +32,13 @@ async def get_embeddings() -> List[embeddings.EmbeddingResponse]:
 
 
 @app.get('/semantic-search')
-async def semantic_search(query: str, top_k: int = 1) -> search.SemanticSearch:
-    return search.semantic_search(query, top_k)
+async def semantic_search(query: str, top_k: int = 1) -> semantic_search.SemanticSearch:
+    return semantic_search.semantic_search(query, top_k)
+
+
+@app.get('/search')
+async def consolidated_search(query: str, top_k: int = 1) -> search.Search:
+    return search.search(query, top_k)
 
 
 @app.get('/tfidf-search')
