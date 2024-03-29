@@ -27,7 +27,7 @@ def core_search(query: str, top_k: int = 3) -> torch.topk:
     return torch.topk(cos_scores, k=top_k)
 
 
-def search(query: str, top_k: int = 3) -> SemanticSearch:
+def semantic_search(query: str, top_k: int = 3) -> SemanticSearch:
     top_results = core_search(query, top_k)
     return SemanticSearch(
         query=query,
@@ -48,6 +48,6 @@ if __name__ == '__main__':
         'machine operator',
     ]
     for q in Q:
-        print(search(q))
+        print(semantic_search(q))
         print()
     print()

@@ -10,4 +10,5 @@ CORPUS: List[Category] = [Category(name=_) for _ in [
     'semi-conductors',
     'bolts & screws',
     'labour',
+    'computer hardware',
 ]]

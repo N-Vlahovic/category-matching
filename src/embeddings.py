@@ -49,4 +49,4 @@ EMBEDDING_RESPONSES: List[EmbeddingResponse] = [EmbeddingResponse.from_embedding
 def get_corpus_embedding() -> torch.Tensor:
     return torch.Tensor(
         [_.embedding for _ in EMBEDDING_RESPONSES]
-    ).reshape([3, EMBEDDINGS[0].embedding.shape[1]]).to(device='mps')
+    ).reshape([len(categories.CORPUS), EMBEDDINGS[0].embedding.shape[1]]).to(device='mps')

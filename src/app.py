@@ -5,6 +5,7 @@ from typing import List
 import categories
 import embeddings
 import search
+import tf_idf
 
 
 app: FastAPI = FastAPI()
@@ -29,6 +30,17 @@ async def get_embeddings() -> List[embeddings.EmbeddingResponse]:
     return embeddings.EMBEDDING_RESPONSES
 
 
-@app.get('/search')
+@app.get('/semantic-search')
 async def semantic_search(query: str, top_k: int = 1) -> search.SemanticSearch:
-    return search.search(query, top_k)
+    return search.semantic_search(query, top_k)
+
+
+@app.get('/tfidf-search')
+async def tfidf_search(query: str, top_k: int = 1) -> tf_idf.TfIdfSearch:
+    return tf_idf.get_tf_idf_scores(query, top_k)
+
+
+if __name__ == '__main__':
+    import uvicorn
+
+    uvicorn.run(app, port=8080)
