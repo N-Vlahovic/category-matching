@@ -23,7 +23,6 @@ def get_tf_idf_scores(query: str, top_k: int) -> TfIdfSearch:
     tfidf = vectorizer.fit_transform(corpus)
     cosine_similarities = linear_kernel(tfidf[0:1], tfidf).flatten()
     related_docs_indices = cosine_similarities.argsort()[:-(top_k + 2):-1][1:]
-    print(related_docs_indices)
     related_docs_scores = cosine_similarities[related_docs_indices]
     results = [TfIdfSearchRes(
         score=s,
