@@ -34,7 +34,6 @@ def helper(s_res: AbstractSearchRes, others: List[AbstractSearchRes]) -> Tuple[f
 
 
 def search(query: str, top_k: int) -> Search:
-    # TODO: Handle TfIdf results that aren't in semantic results
     semantic_results = semantic_search.semantic_search(query, top_k).results
     tfidf_results = tf_idf.get_tf_idf_scores(query, top_k).results
     results = []
@@ -47,14 +46,24 @@ def search(query: str, top_k: int) -> Search:
             tfidf_score=tfidf_score,
             weighted_score=weighted_score,
         ))
+    for s_res in [_ for _ in tfidf_results if _.category not in map(lambda _: _.category, semantic_results)]:
+        category = s_res.category
+        tfidf_score, semantic_score, weighted_score = helper(s_res, tfidf_results)
+        results.append(SearchRes(
+            category=category,
+            semantic_score=semantic_score,
+            tfidf_score=tfidf_score,
+            weighted_score=weighted_score,
+        ))
+    results = sorted(results, key=lambda _: _.weighted_score, reverse=True)
     return Search(
         query=query,
         top_k=top_k,
-        results=sorted(results, key=lambda _: _.weighted_score, reverse=True),
+        results=results[:top_k],
     )
 
 
 if __name__ == '__main__':
     import pprint
 
-    pprint.pprint(search('computer', 2))
+    pprint.pprint(search('operator', 3).dict())
