@@ -39,15 +39,3 @@ def semantic_search(query: str, top_k: int = 3) -> SemanticSearch:
             ) for score, idx in zip(top_results[0], top_results[1])
         ]
     )
-
-
-if __name__ == '__main__':
-    Q = [
-        'single board computer',
-        'screwdriver',
-        'machine operator',
-    ]
-    for q in Q:
-        print(semantic_search(q))
-        print()
-    print()

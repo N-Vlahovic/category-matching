@@ -33,10 +33,3 @@ def get_tf_idf_scores(query: str, top_k: int) -> TfIdfSearch:
         top_k=top_k,
         results=results,
     )
-
-
-if __name__ == '__main__':
-    import pprint
-
-    res = get_tf_idf_scores('computer', 3)
-    pprint.pprint(res)

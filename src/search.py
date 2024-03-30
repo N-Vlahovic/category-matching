@@ -61,9 +61,3 @@ def search(query: str, top_k: int) -> Search:
         top_k=top_k,
         results=results[:top_k],
     )
-
-
-if __name__ == '__main__':
-    import pprint
-
-    pprint.pprint(search('operator', 3).dict())
