@@ -26,6 +26,21 @@ async def get_categories() -> List[categories.Category]:
     return categories.CORPUS
 
 
+@app.post('/category/add')
+async def add_category(name: str) -> categories.CategoryRes:
+    return categories.add_category(name)
+
+
+@app.post('/category/rm')
+async def remove_category(name: str) -> categories.CategoryRes:
+    return categories.rm_category(name)
+
+
+@app.post('/category')
+async def set_categories(names: List[str]) -> categories.CategoryRes:
+    return categories.set_categories(names)
+
+
 @app.get('/embedding')
 async def get_embeddings() -> List[embeddings.EmbeddingResponse]:
     return embeddings.EMBEDDING_RESPONSES
