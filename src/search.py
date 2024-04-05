@@ -22,6 +22,10 @@ class Search(BaseModel):
     results: List[SearchRes]
 
 
+def coalesce_score(score: float | None, fallback: float) -> float:
+    return fallback if score is None or score == 0 else score
+
+
 def helper(s_res: AbstractSearchRes, others: List[AbstractSearchRes]) -> Tuple[float, float, float]:
     this_score = s_res.score
     other_score = None
@@ -29,7 +33,7 @@ def helper(s_res: AbstractSearchRes, others: List[AbstractSearchRes]) -> Tuple[f
         other_score = next(filter(lambda _: _.category == s_res.category, others)).score
     except StopIteration:
         pass
-    weighted_score = .5 * this_score + .5 * (other_score if isinstance(other_score, float) else 0)
+    weighted_score = .5 * coalesce_score(this_score, other_score) + .5 * coalesce_score(other_score, this_score)
     return this_score, other_score, weighted_score
 
 
