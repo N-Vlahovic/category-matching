@@ -46,6 +46,11 @@ async def get_embeddings() -> List[embeddings.EmbeddingResponse]:
     return embeddings.EMBEDDING_RESPONSES
 
 
+@app.post('/embedding')
+async def embed(query: List[str]) -> embeddings.EmbeddingResponse:
+    return embeddings.get_embedding(query)
+
+
 @app.get('/semantic-search')
 async def semantic_search(query: str, top_k: int = 1) -> semantic_search.SemanticSearch:
     return semantic_search.semantic_search(query, top_k)
